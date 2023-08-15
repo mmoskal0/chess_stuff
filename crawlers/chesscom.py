@@ -95,12 +95,6 @@ class ChesscomCrawler:
     def get_game_url(self, game_id):
         return self.url(f"game/live/{game_id}")
 
-    def game(self, username):
-        activity = self.get_user_activity(username)
-        _, game_id = self.get_activity_status(activity)
-        if game_id:
-            return self.url(f"game/live/{game_id}")
-
     def get_user_activity(self, username):
         uuid = self.get_uuid(username)
         if not uuid:
@@ -154,40 +148,6 @@ class ChesscomCrawler:
         arenas = r["arena"]
         tournaments = r["live_tournament"]
         return arenas, tournaments
-
-    def create_arena(self, driver, name):
-        self.login(driver)
-        self.skip_trial(driver)
-
-        driver.get(self.url("play/online/tournaments#club-event"))
-
-        new_arena_button = WebDriverWait(driver, 5).until(
-            expected_conditions.presence_of_element_located(
-                (By.XPATH, "//button[./descendant::div[text()='New Arena']]")
-            )
-        )
-        new_arena_button.click()
-
-        name_input = driver.find_element(
-            By.XPATH, "//div[@data-cy='club-event-name']/input"
-        )
-        name_input.send_keys(name)
-
-        create_button = driver.find_element(
-            By.XPATH, "//button[contains(text(),'Create')]"
-        )
-        create_button.click()
-
-        WebDriverWait(driver, 10).until(
-            expected_conditions.presence_of_element_located(
-                (By.XPATH, f"//div[text()='{name} Arena']")
-            )
-        )
-        share_button = driver.find_element(
-            By.XPATH, "//button[@aria-label='Copy Link']"
-        )
-        share_button.click()
-        return self.read_clipboard(driver)
 
     def last_move(self, driver):
         move = driver.find_elements(
