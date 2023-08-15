@@ -27,14 +27,17 @@ def _init_chrome():
     return chrome.driver
 
 
-def process(params):
+def process(params, asynchronous=False):
     task = params["command"].strip()
-    if task not in AVAILABLE_COMMANDS:
+    try:
+        command = AVAILABLE_COMMANDS[task]
+    except KeyError:
         return f"Unknown command: {task}"
-    command = AVAILABLE_COMMANDS[task]
-    driver = _init_chrome() if command.uses_browser else None
+    if command.uses_browser and not asynchronous:
+        return f"Command '{task}' is only available in asynchronous mode"
 
     try:
+        driver = _init_chrome() if command.uses_browser else None
         result = command.run(params, driver=driver)
     except Exception:
         if command.uses_browser:
@@ -54,7 +57,7 @@ def nightbot_handler(record):
         print("Ignoring empty or duplicate request")
         return
 
-    result = process(message)
+    result = process(message, asynchronous=True)
     r = requests.post(nightbot_url, json={"message": result})
     if r.status_code == 429:
         time.sleep(5)
