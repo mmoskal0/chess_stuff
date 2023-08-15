@@ -1,5 +1,8 @@
+## Introduction
+The goal of this project is to provide a set of commands that can be used to interact with chess.com website. There is
+also a publicly accessible API that can be used to execute these commands. You can contact me for the API `base_url`.
 
-## The commands are accessible via a publicly accessible API. There are 2 types of commands:
+## Command types:
 - Asynchronous commands
   - These commands take a while to execute, mainly due to the cost of initializaing a Chrome browser,
   which in some cases is necessary due to chess.com API limitations. The API will return a blank response and
