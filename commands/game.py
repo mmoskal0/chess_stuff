@@ -9,6 +9,8 @@ class Game(Command):
         player = params["player"]
         crawler = ChesscomCrawler()
         activity = crawler.get_user_activity(player)
+        if activity is None:
+            return "Invalid chess.com username"
         status, game_id = crawler.get_activity_status(activity)
         if game_id:
             return crawler.get_game_url(game_id)

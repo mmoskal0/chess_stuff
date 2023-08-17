@@ -98,7 +98,7 @@ class ChesscomCrawler:
     def get_user_activity(self, username):
         uuid = self.get_uuid(username)
         if not uuid:
-            return False, "Invalid chess.com username"
+            return None
         r = requests.get(
             f"https://www.chess.com/service/presence/watch/users?ids={uuid}",
             cookies=self.cookie,
