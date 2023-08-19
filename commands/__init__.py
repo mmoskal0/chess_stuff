@@ -7,6 +7,7 @@ from .base import AVAILABLE_COMMANDS
 pkgs = (
     "commands",
     "commands.browser",
+    "commands.websockets",
 )
 for pkg in pkgs:
     path = import_module(pkg).__path__

@@ -10,13 +10,14 @@ RUN yum install atk cups-libs gtk3 libXcomposite alsa-lib \
     libXcursor libXdamage libXext libXi libXrandr libXScrnSaver \
     libXtst pango at-spi2-atk libXt xorg-x11-server-Xvfb \
     xorg-x11-xauth dbus-glib dbus-glib-devel procps xdpyinfo -y
-RUN pip install selenium requests
+RUN pip install selenium requests websocket-client chess
 COPY --from=build /opt/chrome-linux /opt/chrome
 COPY --from=build /opt/chromedriver /opt/
 #COPY entrypoint.sh /
 COPY main.py chrome.py ./
 COPY commands ./commands
 COPY crawlers ./crawlers
+COPY eco.json ./
 #ENV DISPLAY=:99
 CMD [ "main.handler" ]
 #ENTRYPOINT ["/entrypoint.sh"]

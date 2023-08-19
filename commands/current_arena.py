@@ -1,5 +1,5 @@
 from commands.base import Command
-from crawlers.chesscom import ChesscomCrawler
+from crawlers.browser import ChesscomCrawler
 
 
 class CurrentArena(Command):

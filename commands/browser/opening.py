@@ -1,5 +1,5 @@
 from commands.browser.base import BrowserCommand
-from crawlers.chesscom import ChesscomCrawler
+from crawlers.browser import ChesscomCrawler
 
 
 class Opening(BrowserCommand):
@@ -9,8 +9,6 @@ class Opening(BrowserCommand):
         player = params["player"]
         crawler = ChesscomCrawler()
         activity = crawler.get_user_activity(player)
-        if activity is None:
-            return "Invalid chess.com username"
         status, game_id = crawler.get_activity_status(activity)
         if not game_id:
             return f"{player} is {status}"

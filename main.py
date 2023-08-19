@@ -5,7 +5,7 @@ import requests
 import time
 from chrome import Chrome
 from commands import AVAILABLE_COMMANDS
-from crawlers.chesscom import ChesscomCrawler
+from crawlers.browser import ChesscomCrawler
 
 FAILURE_MESSAGE = "Something went wrong Sadge"
 
@@ -13,6 +13,8 @@ chrome = None
 return_urls = set()
 
 
+# TODO
+# This belongs in the base BrowserCommand class
 def _init_chrome():
     global chrome
 
