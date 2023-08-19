@@ -46,12 +46,13 @@ class Opening(WebsocketCommand):
         return [" ".join(fen.split(" ")[:3]) for fen in reversed(fens)]
 
     def get_opening_name(self, fens_history):
-        with open(f"{os.environ['LAMBDA_TASK_ROOT']}/eco.json") as f:
+        with open(f"{os.environ['LAMBDA_TASK_ROOT']}/eco_formatted.json") as f:
             eco_db = json.load(f)
             for fen in fens_history:
-                for entry in eco_db:
-                    if entry["f"] == fen:
-                        return entry["n"]
+                try:
+                    return eco_db[fen][0]
+                except KeyError:
+                    pass
         return "Unknown opening"
 
     def get_result(self, params):
@@ -70,3 +71,7 @@ class Opening(WebsocketCommand):
         fens = self.uci_list_to_fens(uci_list)
         fens = self.format_fens_for_eco_lookup(fens)
         return self.get_opening_name(fens)
+
+        # save dictionary x to file
+        # with open("eco.json", "w") as f:
+        #     json.dump(x, f)

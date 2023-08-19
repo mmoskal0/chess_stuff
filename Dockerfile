@@ -17,7 +17,7 @@ COPY --from=build /opt/chromedriver /opt/
 COPY main.py chrome.py ./
 COPY commands ./commands
 COPY crawlers ./crawlers
-COPY eco.json ./
+COPY eco_formatted.json ./
 #ENV DISPLAY=:99
 CMD [ "main.handler" ]
 #ENTRYPOINT ["/entrypoint.sh"]
