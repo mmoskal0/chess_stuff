@@ -3,7 +3,7 @@ from crawlers.browser import ChesscomCrawler
 
 
 class Opening(BrowserCommand):
-    id = "opening"
+    id = "opening_deprecated"
 
     def get_result(self, driver, params):
         player = params["player"]

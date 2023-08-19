@@ -9,7 +9,7 @@ from crawlers.websockets import WebsocketCrawler
 
 
 class Opening(WebsocketCommand):
-    id = "opening_ws"
+    id = "opening"
 
     def tcn_to_uci(self, tcn):
         # I have no idea what this is doing, I copied it from a JS file
@@ -71,7 +71,3 @@ class Opening(WebsocketCommand):
         fens = self.uci_list_to_fens(uci_list)
         fens = self.format_fens_for_eco_lookup(fens)
         return self.get_opening_name(fens)
-
-        # save dictionary x to file
-        # with open("eco.json", "w") as f:
-        #     json.dump(x, f)
