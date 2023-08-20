@@ -1,3 +1,5 @@
+from urllib.parse import unquote
+
 from crawlers.browser import ChesscomCrawler
 
 AVAILABLE_COMMANDS = {}
@@ -21,10 +23,18 @@ class Command:
 
         AVAILABLE_COMMANDS[cls.id] = cls()
 
+    @staticmethod
+    def _clean_params(params):
+        for k, v in params.items():
+            # for whatever reason, Nightbot sometimes sends this unassigned unicode character
+            v = v.replace("\U000E0000", "")
+            params[k] = unquote(v).strip()
+        return params
+
     def _parse_params(self, params):
-        player = params.get("player", "").strip()
-        default_player = params.get("default", "").strip()
-        screenshot = bool(params.get("screenshot", "").strip())
+        player = params.get("player", "")
+        default_player = params.get("default", "")
+        screenshot = bool(params.get("screenshot", ""))
 
         if not player and not default_player:
             self._parsing_error_message = (
@@ -45,6 +55,7 @@ class Command:
         }
 
     def run(self, params, **kwargs):
+        params = self._clean_params(params)
         parsed_params = self._parse_params(params)
         if not parsed_params:
             return self._parsing_error_message
