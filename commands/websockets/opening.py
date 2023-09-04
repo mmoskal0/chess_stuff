@@ -59,7 +59,10 @@ class Opening(WebsocketCommand):
         player = params["player"]
         crawler = ChesscomCrawler()
         activity = crawler.get_user_activity(player)
-        status, game_id = crawler.get_activity_status(activity)
+        try:
+            status, game_id = crawler.get_activity_status(activity)
+        except KeyError:
+            return f"{player} is a new account, utilizing chess.com's new websocket API. Do not blame Slomka that the command stopped working, he tried his best PepeHands"
         if not game_id:
             return f"{player} is {status}"
 
