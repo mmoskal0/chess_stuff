@@ -3,12 +3,12 @@ import os
 
 import chess
 
-from commands.websockets.base import WebsocketCommand
+from commands.base import Command
 from crawlers.browser import ChesscomCrawler
 from crawlers.websockets import WebsocketCrawler
 
 
-class Opening(WebsocketCommand):
+class Opening(Command):
     id = "opening"
 
     def tcn_to_uci(self, tcn):
@@ -66,10 +66,8 @@ class Opening(WebsocketCommand):
         if not game_id:
             return f"{player} is {status}"
 
-        crawler = WebsocketCrawler()
-        crawler.connect(self.ws)
-        crawler.handshake(self.ws)
-        moves = crawler.get_game_moves(self.ws, game_id)
+        crawler = WebsocketCrawler(init=True)
+        moves = crawler.get_game_moves(game_id)
         uci_list = self.tcn_to_uci(moves)
         fens = self.uci_list_to_fens(uci_list)
         fens = self.format_fens_for_eco_lookup(fens)
