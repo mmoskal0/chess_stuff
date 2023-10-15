@@ -3,7 +3,7 @@ from crawlers.browser import ChesscomCrawler
 
 
 class Ping(BrowserCommand):
-    id = "ping"
+    id = "ping_deprecated"
 
     def get_result(self, driver, params):
         crawler = ChesscomCrawler()

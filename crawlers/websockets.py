@@ -101,8 +101,13 @@ class WebsocketCrawler:
             "clientId": self.client_id,
         }
         self.send(ws, message_connect)
+        while r := ws.recv():
+            r = json.loads(r)
+            if r[0]["channel"] == "/meta/connect":
+                break
 
     def get_game_moves(self, ws, game_id):
+        self.refresh(ws)
         message_sub = {
             "channel": "/meta/subscribe",
             "subscription": f"/game/{game_id}",
@@ -114,7 +119,6 @@ class WebsocketCrawler:
             },
         }
         self.send(ws, message_sub)
-        self.refresh(ws)
 
         while r := ws.recv():
             r = json.loads(r)
@@ -122,3 +126,25 @@ class WebsocketCrawler:
                 break
 
         return r[0]["data"]["game"]["moves"]
+
+    def get_ping(self, ws, player):
+        self.refresh(ws)
+        message_ping = {
+            "channel": "/service/user",
+            "data": {"tid": "QueryLagInfo", "uid": player},
+            "id": "",
+            "clientId": self.client_id,
+        }
+        self.send(ws, message_ping)
+        ws.recv()
+        self.refresh(ws)
+
+        while r := ws.recv():
+            r = json.loads(r)
+            if r[0]["channel"] == "/service/user" and "lagms" in r[0]["data"]:
+                break
+        ping = r[0]["data"]["lagms"]
+        status = r[0]["data"]["user"]["status"]
+        player = r[0]["data"]["user"]["uid"]
+
+        return f"{player}: {ping if ping else status}"
