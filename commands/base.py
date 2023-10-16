@@ -5,9 +5,12 @@ from crawlers.browser import ChesscomCrawler
 AVAILABLE_COMMANDS = {}
 
 
+class CommandError(Exception):
+    pass
+
+
 class Command:
     uses_browser = False
-    _parsing_error_message = "Invalid paramaters"
 
     def __init_subclass__(cls, **kwargs):
         if not hasattr(cls, "id"):
@@ -37,27 +40,32 @@ class Command:
         screenshot = bool(params.get("screenshot", ""))
 
         if not player and not default_player:
-            self._parsing_error_message = (
-                "Either player or default player needs to be specified."
-            )
-            return None
+            raise CommandError("Either player or default player needs to be specified.")
         if not player and default_player:
             player = default_player
 
         crawler = ChesscomCrawler()
         if not crawler.is_valid_username(player):
-            self._parsing_error_message = f"Invalid chess.com username: {player}"
-            return None
+            raise CommandError(f"Invalid chess.com username: {player}")
 
         return {
             "player": player,
             "screenshot": screenshot,
         }
 
-    def run(self, params, **kwargs):
-        params = self._clean_params(params)
-        parsed_params = self._parse_params(params)
-        if not parsed_params:
-            return self._parsing_error_message
+    def get_current_game(self, player):
+        crawler = ChesscomCrawler()
+        activity = crawler.get_user_activity(player)
+        status, game_id = crawler.get_activity_status(activity)
+        if game_id:
+            return game_id
+        else:
+            raise CommandError(f"{player} is {status}")
 
-        return self.get_result(parsed_params)
+    def run(self, params, **kwargs):
+        try:
+            params = self._clean_params(params)
+            parsed_params = self._parse_params(params)
+            return self.get_result(parsed_params)
+        except CommandError as e:
+            return str(e)

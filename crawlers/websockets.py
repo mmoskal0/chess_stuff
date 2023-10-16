@@ -47,7 +47,6 @@ class WebsocketCrawler:
 
     def recv(self):
         ret = self.ws.recv()
-        print(ret)
         return ret
 
     def handshake(self):
@@ -115,7 +114,7 @@ class WebsocketCrawler:
         }
         self.send(message_connect)
 
-    def get_game_moves(self, game_id):
+    def get_game(self, game_id):
         message_sub = {
             "channel": "/meta/subscribe",
             "subscription": f"/game/{game_id}",
@@ -132,9 +131,11 @@ class WebsocketCrawler:
         while r := self.recv():
             r = json.loads(r)
             if r[0]["channel"] == f"/game/{game_id}":
-                break
+                return r[0]["data"]["game"]
 
-        return r[0]["data"]["game"]["moves"]
+    def get_game_moves(self, game_id):
+        game = self.get_game(game_id)
+        return game["moves"]
 
     def get_ping(self, player):
         self.refresh()
@@ -156,9 +157,4 @@ class WebsocketCrawler:
         while r := self.recv():
             r = json.loads(r)
             if r[0]["channel"] == "/service/user" and "lagms" in r[0].get("data", {}):
-                break
-        ping = r[0]["data"]["lagms"]
-        status = r[0]["data"]["user"]["status"]
-        player = r[0]["data"]["user"]["uid"]
-
-        return f"Ping {player}: {f'{ping} ms' if ping else status}"
+                return r[0]["data"]

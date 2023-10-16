@@ -71,12 +71,18 @@ def nightbot_handler(record):
 
 def handler(event=None, context=None):
     result = None
+    extra = []
     try:
         if event:
+            print(event)
             params = event.get("queryStringParameters", {})
             if params:
                 # This is a hacky way to tell that the request came directly from the API Gateway
-                result = process(params)
+                run_result = process(params)
+                if isinstance(run_result, list):
+                    # result = run_result[-1]
+                    # extra = run_result[:-1]
+                    result = run_result[0]
             else:
                 # This means the request came from SQS, so it's an async request from Nightbot
                 for record in event["Records"]:

@@ -3,7 +3,7 @@ from crawlers.browser import ChesscomCrawler
 
 
 class Opponent(BrowserCommand):
-    id = "opponent"
+    id = "opponent_deprecated"
 
     def get_result(self, driver, params):
         player = params["player"]

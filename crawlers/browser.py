@@ -101,7 +101,26 @@ class ChesscomCrawler:
     def get_game_url(self, game_id):
         return self.url(f"game/live/{game_id}")
 
+    def get_player_stats(self, username):
+        r = requests.get(f"https://www.chess.com/callback/member/stats/{username}")
+        return r.json()
+
+    def get_score(self, player1_id, player2_id):
+        r = requests.get(
+            f"https://www.chess.com/callback/user/lifetime-score/{player1_id}/{player2_id}",
+            cookies=self.cookie,
+        )
+        return r.json()
+
     def get_user_activity(self, username):
+        uuid = self.get_uuid(username)
+        r = requests.get(
+            f"https://www.chess.com/service/presence/users?ids={uuid}",
+            cookies=self.cookie,
+        )
+        return r.json()["users"]
+
+    def get_user_activity_stream(self, username):
         uuid = self.get_uuid(username)
         r = requests.get(
             f"https://www.chess.com/service/presence/watch/users?ids={uuid}",
@@ -110,7 +129,7 @@ class ChesscomCrawler:
         )
         return r.iter_lines(decode_unicode=True)
 
-    def get_activity_status(self, activity):
+    def get_activity_status_stream(self, activity):
         status, game_id = None, None
         for record in activity:
             if record.startswith("data"):
@@ -123,6 +142,18 @@ class ChesscomCrawler:
                     return status, game_id
                 game_id = data["activityContext"]["games"][0]["legacyId"]
                 return status, game_id
+
+    def get_activity_status(self, activity):
+        status, game_id = None, None
+        for data in activity:
+            if data["status"] != "online":
+                status = "not online"
+                return status, game_id
+            if data["activity"] != "playing":
+                status = "online but not playing"
+                return status, game_id
+            game_id = data["activityContext"]["games"][0]["legacyId"]
+            return status, game_id
 
     def skip_trial(self, driver):
         try:
@@ -223,7 +254,7 @@ class ChesscomCrawler:
         return user1, user2
 
     def get_member_url(self, username):
-        return self.url(f"member/{username}")
+        return self.url(f"member/{username.lower()}")
 
     def opening(self, driver, game_id, screenshot=False):
         game_url = self.get_game_url(game_id)
