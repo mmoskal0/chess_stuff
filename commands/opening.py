@@ -1,5 +1,6 @@
 import json
 import os
+import random
 
 import chess
 
@@ -55,20 +56,99 @@ class Opening(Command):
                     pass
         return "Unknown opening"
 
+    def get_silly_opening_name(self):
+        choices = [
+            "The Goose Opening: Beak Attack, King's Knight Development",
+            "The Goose Opening: Beak Attack, Queen's Rook Activation",
+            "The Goose Opening: Beak Attack, Central Pawn Push",
+            "The Goose Opening: Feathered Defense, Early Pawn Push",
+            "The Goose Opening: Feathered Defense, Pin Variation",
+            "The Goose Opening: Feathered Defense, Retreat Line",
+            "The Goose Opening: Flight Formation, Central Pawn Control",
+            "The Goose Opening: Flight Formation, Long Castling Strategy",
+            "The Goose Opening: Flight Formation, Pawn Storm Tactics",
+            "The Goose Opening: Gaggle Gambit, Declined",
+            "The Goose Opening: Gaggle Gambit, Accepted",
+            "The Goose Opening: Gaggle Gambit, Knight Maneuver",
+            "The Goose Opening: Gander Gambit, Gambit Accepted",
+            "The Goose Opening: Gander Gambit, Gambit Declined",
+            "The Goose Opening: Gander Gambit, King's Rook Defense",
+            "The Goose Opening: Honk Gambit, Aggressive Line",
+            "The Goose Opening: Honk Gambit, Quiet Line",
+            "The Goose Opening: Honk Gambit, Sacrificial Attack",
+            "The Goose Opening: Goose Chase Variation, Early Castling",
+            "The Goose Opening: Goose Chase Variation, Pawn Storm Tactics",
+            "The Goose Opening: Goose Chase Variation, Sacrificial Line",
+            "The Goose Opening: Migratory Line, Central Control",
+            "The Goose Opening: Migratory Line, Double Pawn Push",
+            "The Goose Opening: Migratory Line, Long Castling",
+            "The Goose Opening: Pondside Gambit, Counterattack Formation",
+            "The Goose Opening: Pondside Gambit, Early Queen's Bishop Maneuver",
+            "The Goose Opening: Pondside Gambit, Sacrificial Attack",
+            "The Goose Opening: Poultry Gambit, Aggressive Line",
+            "The Goose Opening: Poultry Gambit, King's Knight Development",
+            "The Goose Opening: Poultry Gambit, Solid Line",
+            "The Goose Opening: Preening Variation, Counterattack Line",
+            "The Goose Opening: Preening Variation, Pawn Chain Formation",
+            "The Goose Opening: Preening Variation, Queen's Bishop Maneuver",
+            "The Goose Opening: Snow Goose Formation, Long Castling Strategy",
+            "The Goose Opening: Snow Goose Formation, Pawn Chain Defense",
+            "The Goose Opening: Snow Goose Formation, Queen's Bishop Maneuver",
+        ]
+        return random.choice(choices)
+
+    def get_silly_defense_name(self):
+        choices = [
+            "The Goose Defense: Cygnet Formation, Main Line",
+            "The Goose Defense: Cygnet Formation, Closed Variation",
+            "The Goose Defense: Cygnet Formation, Gosling Gambit",
+            "The Goose Defense: Downy Line, Old Main Line",
+            "The Goose Defense: Downy Line, Counterattacking Variation",
+            "The Goose Defense: Downy Line, Quiet Defense",
+            "The Goose Defense: Gosling Formation, Fianchetto Variation",
+            "The Goose Defense: Gosling Formation, Pawn Storm Line",
+            "The Goose Defense: Gosling Formation, Double Knight Maneuver",
+            "The Goose Defense: Puddle Line, Counter-Gambit",
+            "The Goose Defense: Puddle Line, Aggressive Line",
+            "The Goose Defense: Puddle Line, Pawn Tension Variation",
+            "The Goose Defense: Quack Formation, Central Pawn Push",
+            "The Goose Defense: Quack Formation, Double Pawn Sacrifice",
+            "The Goose Defense: Quack Formation, Early Castling",
+            "The Goose Defense: Waddle Gambit, King's Rook Defense",
+            "The Goose Defense: Waddle Gambit, Sharp Line",
+            "The Goose Defense: Waddle Gambit, Solid Line",
+            "The Goose Defense: Webbed Variation, Knight Outpost",
+            "The Goose Defense: Webbed Variation, Pawn Chain Setup",
+            "The Goose Defense: Webbed Variation, Solid Line",
+            "The Goose Defense: Wetland Variation, Central Pawn Control",
+            "The Goose Defense: Wetland Variation, Double Pawn Push",
+            "The Goose Defense: Wetland Variation, Queen's Rook Activation",
+            "The Goose Defense: Splash Gambit, Accepted",
+            "The Goose Defense: Splash Gambit, Declined",
+            "The Goose Defense: Splash Gambit, Central Pawn Attack",
+        ]
+
+        return random.choice(choices)
+
     def get_result(self, params):
         player = params["player"]
-        crawler = ChesscomCrawler()
-        activity = crawler.get_user_activity(player)
-        try:
-            status, game_id = crawler.get_activity_status(activity)
-        except KeyError:
-            return f"{player} is a new account, utilizing chess.com's new websocket API. Do not blame Slomka that the command stopped working, he tried his best PepeHands"
-        if not game_id:
-            return f"{player} is {status}"
+        game_id = self.get_current_game(player)
 
         crawler = WebsocketCrawler(init=True)
         moves = crawler.get_game_moves(game_id)
         uci_list = self.tcn_to_uci(moves)
+
+        # Temporary, because I'm too lazy to actually add the fens to the database
+        if uci_list[0] == "g2g4":
+            return self.get_silly_opening_name()
+        elif "g7g5" in uci_list[1:4]:
+            return self.get_silly_defense_name()
+
         fens = self.uci_list_to_fens(uci_list)
         fens = self.format_fens_for_eco_lookup(fens)
-        return self.get_opening_name(fens)
+        opening = self.get_opening_name(fens)
+        # Replace "Ponziani" with something that mocks Ponziani opening, because it's a bad opening
+        if opening == "Ponziani":
+            return "Ponziani? More like Ponzi-scam-i, amirite?"
+
+        return opening

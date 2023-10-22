@@ -15,7 +15,7 @@ class Opponent(Command):
 
     def get_stats(self, player, opponent):
         crawler = ChesscomCrawler()
-        stats = crawler.get_player_stats(player["uid"])
+        stats = crawler.get_player_stats(opponent["uid"])
         parsed_stats = {}
         stat_keys = ["lightning", "bullet", "rapid", "tactics", "tactics_challenge"]
         for stat in stats["stats"]:
@@ -49,8 +49,9 @@ class Opponent(Command):
 
         result = {}
         profile = crawler.get_member_url(opponent["uid"])
-        if opponent.get("fullname"):
-            result["Name"] = opponent["fullname"]
+        name = opponent.get("fullname", "").strip()
+        if name:
+            result["Name"] = name
         result["Ping"] = f"{opponent['lagms']} ms"
         if "blitz" in stats:
             result["Blitz"] = stats["blitz"]
@@ -73,6 +74,6 @@ class Opponent(Command):
         crawler = WebsocketCrawler(init=True)
         game = crawler.get_game(game_id)
         player, opponent = self.get_opponent(player, game["players"])
-        stats = self.get_stats(opponent, player)
+        stats = self.get_stats(player, opponent)
         player_ping = f"{player['uid']}: Ping: {player['lagms']}, Lag: {player['lag']}"
         return [self.format_result(player, opponent, stats), player_ping]
