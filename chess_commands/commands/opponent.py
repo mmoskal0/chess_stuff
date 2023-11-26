@@ -1,6 +1,6 @@
-from chess_commands.commands.base import Command
-from chess_commands.crawlers.browser import ChesscomCrawler
-from chess_commands.crawlers.websockets import WebsocketCrawler
+from commands.base import Command
+from crawlers.browser import ChesscomCrawler
+from crawlers.websockets import WebsocketCrawler
 
 
 class Opponent(Command):

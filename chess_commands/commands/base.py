@@ -1,6 +1,6 @@
 from urllib.parse import unquote
 
-from chess_commands.crawlers.browser import ChesscomCrawler
+from crawlers.browser import ChesscomCrawler
 
 AVAILABLE_COMMANDS = {}
 

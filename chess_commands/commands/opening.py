@@ -4,8 +4,8 @@ import random
 
 import chess
 
-from chess_commands.commands.base import Command
-from chess_commands.crawlers.websockets import WebsocketCrawler
+from commands.base import Command
+from crawlers.websockets import WebsocketCrawler
 
 
 class Opening(Command):

@@ -3,31 +3,13 @@ import traceback
 
 import requests
 import time
-from chrome import Chrome
 from commands import AVAILABLE_COMMANDS
-from crawlers.browser import ChesscomCrawler
 
-FAILURE_MESSAGE = "Something went wrong Sadge"
+FAILURE_MESSAGE = "Something went wrong hannahhStare"
 
 chrome = None
 return_urls = set()
 is_cold_start = True
-
-
-# TODO
-# This belongs in the base BrowserCommand class
-def _init_chrome():
-    global chrome
-
-    if chrome is not None and chrome.is_alive():
-        print("Reusing browser!")
-    else:
-        chrome = Chrome(headless=True)
-        chrome.connect()
-        crawler = ChesscomCrawler()
-        crawler.login(chrome.driver)
-
-    return chrome.driver
 
 
 def process(params, asynchronous=False):
@@ -40,12 +22,9 @@ def process(params, asynchronous=False):
         return f"Command '{task}' is only available in asynchronous mode"
 
     try:
-        driver = _init_chrome() if command.uses_browser else None
+        driver = None
         result = command.run(params, driver=driver)
     except Exception:
-        if command.uses_browser:
-            crawler = ChesscomCrawler()
-            crawler.screenshot(driver, "exception")
         raise
     print(f"Success: {task}: {result}")
     return result
@@ -85,7 +64,7 @@ def handler(event=None, context=None):
         if event:
             print(event)
             params = event.get("queryStringParameters", {})
-            response_url = params.get("headers")["Nightbot-Response-Url"]
+            response_url = event.get("headers")["Nightbot-Response-Url"]
             extra_message = None
             if params:
                 # This is a hacky way to tell that the request came directly from the API Gateway

@@ -1,5 +1,5 @@
-from chess_commands.commands.base import Command
-from chess_commands.crawlers.browser import ChesscomCrawler
+from commands.base import Command
+from crawlers.browser import ChesscomCrawler
 
 
 class Game(Command):
