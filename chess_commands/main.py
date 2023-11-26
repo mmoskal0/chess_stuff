@@ -11,6 +11,7 @@ FAILURE_MESSAGE = "Something went wrong Sadge"
 
 chrome = None
 return_urls = set()
+is_cold_start = True
 
 
 # TODO
@@ -69,13 +70,23 @@ def nightbot_handler(record):
     return result
 
 
+def send_extra_message(response_url, message):
+    r = requests.post(response_url, json={"message": message})
+    while r.status_code == 429:
+        time.sleep(5)
+        r = requests.post(response_url, json={"message": message})
+
+
 def handler(event=None, context=None):
+    global is_cold_start
     result = None
     extra = []
     try:
         if event:
             print(event)
             params = event.get("queryStringParameters", {})
+            response_url = params.get("headers")["Nightbot-Response-Url"]
+            extra_message = None
             if params:
                 # This is a hacky way to tell that the request came directly from the API Gateway
                 result = process(params)
@@ -85,10 +96,13 @@ def handler(event=None, context=None):
                     result = result[0]
             else:
                 # This means the request came from SQS, so it's an async request from Nightbot
-                for record in event["Records"]:
-                    result = nightbot_handler(record)
+                result = "Async commands are no longer supported"
+                # for record in event["Records"]:
+                #     result = nightbot_handler(record)
         return {"statusCode": 200, "body": result}
     except Exception:
         print("fail")
         print(traceback.format_exc())
         return {"statusCode": 200, "body": FAILURE_MESSAGE}
+    finally:
+        is_cold_start = False

@@ -1,9 +1,9 @@
-from commands.browser.base import BrowserCommand
-from crawlers.browser import ChesscomCrawler
+from chess_commands.commands.browser.base import BrowserCommand
+from chess_commands.crawlers.browser import ChesscomCrawler
 
 
-class Eval(BrowserCommand):
-    id = "eval"
+class Opening(BrowserCommand):
+    id = "opening_deprecated"
 
     def get_result(self, driver, params):
         player = params["player"]
@@ -12,5 +12,5 @@ class Eval(BrowserCommand):
         status, game_id = crawler.get_activity_status(activity)
         if not game_id:
             return f"{player} is {status}"
-        score, last_move = crawler.eval(driver, game_id, params["screenshot"])
-        return f"{score} after {last_move}"
+
+        return crawler.opening(driver, game_id, params["screenshot"])

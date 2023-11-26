@@ -1,4 +1,4 @@
-from commands.base import Command
+from chess_commands.commands.base import Command
 
 
 class BrowserCommand(Command):

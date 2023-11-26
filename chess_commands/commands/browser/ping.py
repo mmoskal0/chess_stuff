@@ -1,5 +1,5 @@
-from commands.browser.base import BrowserCommand
-from crawlers.browser import ChesscomCrawler
+from chess_commands.commands.browser.base import BrowserCommand
+from chess_commands.crawlers.browser import ChesscomCrawler
 
 
 class Ping(BrowserCommand):

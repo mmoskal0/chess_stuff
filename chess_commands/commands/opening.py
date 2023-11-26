@@ -4,9 +4,8 @@ import random
 
 import chess
 
-from commands.base import Command
-from crawlers.browser import ChesscomCrawler
-from crawlers.websockets import WebsocketCrawler
+from chess_commands.commands.base import Command
+from chess_commands.crawlers.websockets import WebsocketCrawler
 
 
 class Opening(Command):
@@ -147,8 +146,5 @@ class Opening(Command):
         fens = self.uci_list_to_fens(uci_list)
         fens = self.format_fens_for_eco_lookup(fens)
         opening = self.get_opening_name(fens)
-        # Replace "Ponziani" with something that mocks Ponziani opening, because it's a bad opening
-        if opening == "Ponziani":
-            return "Ponziani? More like Ponzi-scam-i, amirite?"
 
         return opening

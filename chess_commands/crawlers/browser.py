@@ -14,7 +14,7 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 
-from crawlers.selenium_utils import (
+from chess_commands.crawlers.selenium_utils import (
     text_not_empty_in_element,
     at_least_n_elements_with_text_except,
 )
