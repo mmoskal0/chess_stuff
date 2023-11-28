@@ -1,4 +1,5 @@
 from commands.base import Command
+from commands.emojis import Emoji
 from crawlers.websockets import WebsocketCrawler
 
 
@@ -7,11 +8,11 @@ class Opening(Command):
 
     @staticmethod
     def format_result(data):
-        ping = data["lagms"]
+        ping = int(data["lagms"])
         status = data["user"]["status"]
         player = data["user"]["uid"]
 
-        return f"Ping {player}: {f'{ping} ms' if ping else status}"
+        return f"{Emoji.bars} Ping {player}: {f'{ping} ms' if ping else status}"
 
     def get_result(self, params):
         player = params["player"]

@@ -27,27 +27,9 @@ class ChesscomCrawler:
     def cookie(self):
         return {"CHESSCOM_REMEMBERME": self.cookie_value}
 
-    def login(self, driver):
-        success = self.login_with_cookie(driver)
-        return success
-
-    def login_with_cookie(self, driver):
-        driver.get(self.url("home"))
-        # if a cookie expires, it's easier to just replace it once a year
-        next_year = int(time.time()) + 31536000
-
-        cookie = {
-            "domain": ".www.chess.com",
-            "expiry": next_year,
-            "httpOnly": True,
-            "name": "CHESSCOM_REMEMBERME",
-            "path": "/",
-            "sameSite": "Lax",
-            "secure": True,
-            "value": self.cookie_value,
-        }
-        driver.add_cookie(cookie)
-        return cookie
+    def get_user_details(self, username):
+        response = requests.get(f"https://www.chess.com/callback/user/popup/{username}")
+        return response.json()
 
     def get_uuid(self, username):
         global chess_uuids
@@ -55,9 +37,8 @@ class ChesscomCrawler:
             print("HIT CACHE FOR UUID")
             return chess_uuids[username]
 
-        response = requests.get(f"https://www.chess.com/callback/user/popup/{username}")
         try:
-            uuid = response.json()["uuid"]
+            uuid = self.get_user_details(username)["uuid"]
             chess_uuids[username] = uuid
         except:
             uuid = None
@@ -117,16 +98,18 @@ class ChesscomCrawler:
         for data in activity:
             if data["status"] != "online":
                 status = "not online"
-                return status, game_id
+                return status, game_id, None
             if data["activity"] != "playing":
                 status = "online but not playing"
-                return status, game_id
+                return status, game_id, None
             game_id = data["activityContext"]["games"][0]["legacyId"]
-            return status, game_id
+            stream_url = data.get("streaming", {}).get("url")
+            return status, game_id, stream_url
 
-    def read_clipboard(self, driver):
-        clipboard_text = driver.execute_script("return navigator.clipboard.readText()")
-        return clipboard_text
+    def get_stream_url(self, player):
+        activity = self.get_user_activity(player)
+        status, game_id, stream_url = self.get_activity_status(activity)
+        return stream_url
 
     def upcoming_tournaments(self, club_id):
         r = requests.get(

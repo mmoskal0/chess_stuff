@@ -1,4 +1,7 @@
+import flag
+
 from commands.base import Command
+from commands.emojis import Emoji
 from crawlers.browser import ChesscomCrawler
 from crawlers.websockets import WebsocketCrawler
 
@@ -26,12 +29,13 @@ class Opponent(Command):
 
             if key == "tactics_challenge":
                 p = s["modes"]
-                three_min = p.get("three_minutes", "0")
-                five_min = p.get("five_minutes", "0")
-                survival = p.get("three_check", "0")
-                parsed_stats[
-                    "puzzle_rush"
-                ] = f"{three_min}/{five_min}/{survival} (3min/5min/Survival)"
+                three_min = p.get("three_minutes", 0)
+                five_min = p.get("five_minutes", 0)
+                survival = p.get("three_check", 0)
+                if three_min or five_min or survival:
+                    parsed_stats[
+                        "puzzle_rush"
+                    ] = f"{three_min}/{five_min}/{survival} (3min/5min/Survival)"
             else:
                 if key == "lightning":
                     key = "blitz"
@@ -47,33 +51,52 @@ class Opponent(Command):
     def format_result(self, player, opponent, stats):
         crawler = ChesscomCrawler()
 
-        result = {}
+        opponent_uid = opponent["uid"]
+        opponent_details = crawler.get_user_details(opponent_uid)
+        country_code = opponent["country"]
+        user_flag = (
+            flag.flag(country_code) if country_code != "XX" else Emoji.white_flag
+        )
+        country = opponent_details["countryName"]
+        join_date = opponent_details["joinDate"]
         profile = crawler.get_member_url(opponent["uid"])
         name = opponent.get("fullname", "").strip()
-        if name:
-            result["Name"] = name
-        result["Ping"] = f"{opponent['lagms']} ms"
-        if "blitz" in stats:
-            result["Blitz"] = stats["blitz"]
-        if "bullet" in stats:
-            result["Bullet"] = stats["bullet"]
-        if "rapid" in stats:
-            result["Rapid"] = stats["rapid"]
-        if "tactics" in stats:
-            result["Tactics"] = stats["tactics"]
-        if "puzzle_rush" in stats:
-            result["Puzzle Rush"] = stats["puzzle_rush"]
-        result[f"Record vs {player['uid']}"] = stats["lifetime_score"]
+        result_profile = f"Opponent is {name} from {country} {user_flag}. Joined: {join_date} {Emoji.calendar}. Ping: {opponent['lagms']} ms {Emoji.bars}. Profile: {profile}"
 
-        return profile + "       " + ", ".join([f"{k}: {v}" for k, v in result.items()])
+        ratings = {}
+        if "blitz" in stats:
+            ratings["Blitz"] = stats["blitz"]
+        if "bullet" in stats:
+            ratings["Bullet"] = stats["bullet"]
+        if "rapid" in stats:
+            ratings["Rapid"] = stats["rapid"]
+        if "tactics" in stats:
+            ratings["Tactics"] = stats["tactics"]
+        if "puzzle_rush" in stats:
+            ratings["Puzzle Rush"] = stats["puzzle_rush"]
+        ratings[f"Record vs {player['uid']}"] = stats["lifetime_score"]
+        result_stats = "Stats Nerdge " + ", ".join(
+            [f"{k}: {v}" for k, v in ratings.items()]
+        )
+
+        result = [
+            result_profile,
+            result_stats,
+        ]
+
+        stream_url = crawler.get_stream_url(opponent_uid)
+        if stream_url:
+            result.append(f"{opponent_uid} is streaming at {stream_url}")
+
+        return result
 
     def get_result(self, params):
         player = params["player"]
-        game_id = self.get_current_game(player)
+        game_id = self.get_game_id(player)
 
         crawler = WebsocketCrawler(init=True)
         game = crawler.get_game(game_id)
         player, opponent = self.get_opponent(player, game["players"])
         stats = self.get_stats(player, opponent)
-        player_ping = f"{player['uid']}: Ping: {player['lagms']}, Lag: {player['lag']}"
-        return [self.format_result(player, opponent, stats), player_ping]
+        result = self.format_result(player, opponent, stats)
+        return result

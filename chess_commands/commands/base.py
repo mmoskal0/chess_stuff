@@ -53,10 +53,13 @@ class Command:
             "screenshot": screenshot,
         }
 
-    def get_current_game(self, player):
+    def get_user_activity_status(self, player):
         crawler = ChesscomCrawler()
         activity = crawler.get_user_activity(player)
-        status, game_id = crawler.get_activity_status(activity)
+        return crawler.get_activity_status(activity)
+
+    def get_game_id(self, player):
+        status, game_id, stream_url = self.get_user_activity_status(player)
         if game_id:
             return game_id
         else:

@@ -5,6 +5,7 @@ import random
 import chess
 
 from commands.base import Command
+from commands.emojis import Emoji
 from crawlers.websockets import WebsocketCrawler
 
 
@@ -131,7 +132,7 @@ class Opening(Command):
 
     def get_result(self, params):
         player = params["player"]
-        game_id = self.get_current_game(player)
+        game_id = self.get_game_id(player)
 
         crawler = WebsocketCrawler(init=True)
         moves = crawler.get_game_moves(game_id)
@@ -147,4 +148,4 @@ class Opening(Command):
         fens = self.format_fens_for_eco_lookup(fens)
         opening = self.get_opening_name(fens)
 
-        return opening
+        return [f"{Emoji.book} {opening}", "PepoG"]
